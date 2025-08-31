@@ -14,7 +14,7 @@ const client = new Client({
 // Server configuration
 const SERVERS = [
     {
-        name: 'Main Server',
+        name: 'Takistan Life',
         type: 'arma3',
         host: process.env.ARMA3_SERVER_IP || '127.0.0.1',
         port: parseInt(process.env.ARMA3_SERVER_PORT) || 2302,
@@ -146,7 +146,7 @@ async function updateStatusMessage(serverConfig, status) {
 
 function createStatusEmbed(status) {
     const embed = new EmbedBuilder()
-        .setTitle(`🎮 ${status.name}`)
+        .setTitle(`${status.name}`)
         .setTimestamp(status.lastUpdated);
     
     if (status.online) {
