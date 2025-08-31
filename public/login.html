@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord Bot Panel - Login</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .login-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.1);
+        }
+        
+        .input-field {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .input-field:focus {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.4);
+            outline: none;
+        }
+        
+        .btn-login {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .floating-shapes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+        
+        .shape {
+            position: absolute;
+            opacity: 0.1;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .shape:nth-child(1) {
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+        
+        .shape:nth-child(2) {
+            top: 60%;
+            right: 10%;
+            animation-delay: 2s;
+        }
+        
+        .shape:nth-child(3) {
+            bottom: 20%;
+            left: 50%;
+            animation-delay: 4s;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .error-message {
+            animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
+        }
+        
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen text-white">
+    <!-- Floating background shapes -->
+    <div class="floating-shapes">
+        <div class="shape w-20 h-20 bg-white rounded-full"></div>
+        <div class="shape w-32 h-32 bg-white rounded-full"></div>
+        <div class="shape w-16 h-16 bg-white rounded-full"></div>
+    </div>
+
+    <div class="w-full max-w-md px-6">
+        <!-- Logo and Title -->
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-white bg-opacity-20 rounded-full mb-4">
+                <i class="fas fa-robot text-2xl"></i>
+            </div>
+            <h1 class="text-3xl font-bold mb-2">Discord Bot Panel</h1>
+            <p class="text-white text-opacity-70">Sign in to access the dashboard</p>
+        </div>
+
+        <!-- Login Form -->
+        <div class="login-card rounded-2xl p-8">
+            <form id="loginForm" method="POST" action="/login">
+                <div class="space-y-6">
+                    <!-- Username Field -->
+                    <div>
+                        <label for="username" class="block text-sm font-medium mb-2">
+                            <i class="fas fa-user mr-2"></i>Username
+                        </label>
+                        <input 
+                            type="text" 
+                            id="username" 
+                            name="username" 
+                            required 
+                            class="input-field w-full px-4 py-3 rounded-lg text-white placeholder-gray-300 transition duration-200"
+                            placeholder="Enter your username"
+                        >
+                    </div>
+
+                    <!-- Password Field -->
+                    <div>
+                        <label for="password" class="block text-sm font-medium mb-2">
+                            <i class="fas fa-lock mr-2"></i>Password
+                        </label>
+                        <div class="relative">
+                            <input 
+                                type="password" 
+                                id="password" 
+                                name="password" 
+                                required 
+                                class="input-field w-full px-4 py-3 rounded-lg text-white placeholder-gray-300 pr-12 transition duration-200"
+                                placeholder="Enter your password"
+                            >
+                            <button 
+                                type="button" 
+                                onclick="togglePassword()" 
+                                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-300 hover:text-white transition duration-200"
+                            >
+                                <i id="passwordToggle" class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Error Message -->
+                    <div id="errorMessage" class="hidden error-message bg-red-500 bg-opacity-20 border border-red-500 border-opacity-30 rounded-lg p-3 text-center">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        <span id="errorText">Invalid username or password</span>
+                    </div>
+
+                    <!-- Login Button -->
+                    <button 
+                        type="submit" 
+                        class="btn-login w-full py-3 px-4 rounded-lg font-semibold text-white transition duration-200 flex items-center justify-center"
+                        id="loginButton"
+                    >
+                        <span id="loginText">
+                            <i class="fas fa-sign-in-alt mr-2"></i>Sign In
+                        </span>
+                        <div id="loadingSpinner" class="hidden">
+                            <i class="fas fa-spinner fa-spin mr-2"></i>Signing In...
+                        </div>
+                    </button>
+                </div>
+            </form>
+
+            <!-- Additional Info -->
+            <div class="mt-6 text-center text-sm text-white text-opacity-60">
+                <p>
+                    <i class="fas fa-info-circle mr-1"></i>
+                    Contact an administrator for access
+                </p>
+            </div>
+        </div>
+
+        <!-- Features List -->
+        <div class="mt-8 text-center">
+            <h3 class="text-lg font-semibold mb-4">Panel Features</h3>
+            <div class="grid grid-cols-2 gap-4 text-sm text-white text-opacity-70">
+                <div class="flex items-center">
+                    <i class="fas fa-ticket-alt w-4 mr-2"></i>
+                    Support Tickets
+                </div>
+                <div class="flex items-center">
+                    <i class="fas fa-shield-alt w-4 mr-2"></i>
+                    Moderation Logs
+                </div>
+                <div class="flex items-center">
+                    <i class="fas fa-terminal w-4 mr-2"></i>
+                    Command Tracking
+                </div>
+                <div class="flex items-center">
+                    <i class="fas fa-gamepad w-4 mr-2"></i>
+                    Arma 3 Monitoring
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check for error parameter in URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const error = urlParams.get('error');
+        
+        if (error === 'invalid') {
+            showError('Invalid username or password');
+        }
+
+        // Form submission handling
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            const button = document.getElementById('loginButton');
+            const loginText = document.getElementById('loginText');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            
+            // Show loading state
+            loginText.classList.add('hidden');
+            loadingSpinner.classList.remove('hidden');
+            button.disabled = true;
+            
+            // Hide any existing error messages
+            hideError();
+        });
+
+        // Password toggle function
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleIcon = document.getElementById('passwordToggle');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        }
+
+        // Error handling functions
+        function showError(message) {
+            const errorMessage = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            
+            errorText.textContent = message;
+            errorMessage.classList.remove('hidden');
+            
+            // Auto-hide after 5 seconds
+            setTimeout(hideError, 5000);
+        }
+
+        function hideError() {
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.classList.add('hidden');
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Focus username field when 'u' is pressed
+            if (e.key === 'u' && !e.ctrlKey && !e.altKey && document.activeElement.tagName !== 'INPUT') {
+                e.preventDefault();
+                document.getElementById('username').focus();
+            }
+            
+            // Focus password field when 'p' is pressed
+            if (e.key === 'p' && !e.ctrlKey && !e.altKey && document.activeElement.tagName !== 'INPUT') {
+                e.preventDefault();
+                document.getElementById('password').focus();
+            }
+        });
+
+        // Auto-focus username field on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('username').focus();
+        });
+
+        // Handle form validation
+        function validateForm() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            
+            if (!username) {
+                showError('Please enter your username');
+                return false;
+            }
+            
+            if (!password) {
+                showError('Please enter your password');
+                return false;
+            }
+            
+            if (username.length < 3) {
+                showError('Username must be at least 3 characters long');
+                return false;
+            }
+            
+            return true;
+        }
+
+        // Add validation to form submit
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            if (!validateForm()) {
+                e.preventDefault();
+                const button = document.getElementById('loginButton');
+                const loginText = document.getElementById('loginText');
+                const loadingSpinner = document.getElementById('loadingSpinner');
+                
+                // Reset button state
+                loginText.classList.remove('hidden');
+                loadingSpinner.classList.add('hidden');
+                button.disabled = false;
+            }
+        });
+
+        // Real-time validation feedback
+        document.getElementById('username').addEventListener('input', function() {
+            if (this.value.trim().length >= 3) {
+                this.classList.remove('border-red-500');
+                this.classList.add('border-green-500');
+            } else {
+                this.classList.remove('border-green-500');
+                this.classList.add('border-red-500');
+            }
+        });
+
+        document.getElementById('password').addEventListener('input', function() {
+            if (this.value.length > 0) {
+                this.classList.remove('border-red-500');
+                this.classList.add('border-green-500');
+            } else {
+                this.classList.remove('border-green-500');
+                this.classList.add('border-red-500');
+            }
+        });
+    </script>
+</body>
+</html>

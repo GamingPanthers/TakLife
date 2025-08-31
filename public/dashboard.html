@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord Bot Panel - Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        .card {
+            background: linear-gradient(145deg, #374151, #4B5563);
+            box-shadow: 20px 20px 60px #1F2937, -20px -20px 60px #4B5563;
+            border-radius: 15px;
+            border: 1px solid #6B7280;
+        }
+        .btn-primary {
+            background: linear-gradient(45deg, #3B82F6, #1D4ED8);
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+        }
+        .sidebar-item:hover {
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.1), transparent);
+            border-left: 4px solid #3B82F6;
+        }
+        .status-online { color: #10B981; }
+        .status-offline { color: #EF4444; }
+        .status-idle { color: #F59E0B; }
+        
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .glass {
+            backdrop-filter: blur(10px);
+            background: rgba(75, 85, 99, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-gray-800 shadow-2xl border-b border-gray-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-robot text-3xl text-blue-400"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h1 class="text-xl font-semibold">Discord Bot Panel</h1>
+                        <p class="text-sm text-gray-400">Management Dashboard</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                        <span class="text-sm text-gray-300">Bot Online</span>
+                    </div>
+                    <button onclick="logout()" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg transition duration-200">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <div class="w-64 bg-gray-800 shadow-xl">
+            <div class="p-6">
+                <nav class="space-y-2">
+                    <a href="#dashboard" class="sidebar-item flex items-center px-4 py-3 text-gray-300 rounded-lg hover:text-white transition duration-200" onclick="showSection('dashboard')">
+                        <i class="fas fa-tachometer-alt mr-3"></i>Dashboard
+                    </a>
+                    <a href="#tickets" class="sidebar-item flex items-center px-4 py-3 text-gray-300 rounded-lg hover:text-white transition duration-200" onclick="showSection('tickets')">
+                        <i class="fas fa-ticket-alt mr-3"></i>Support Tickets
+                    </a>
+                    <a href="#moderation" class="sidebar-item flex items-center px-4 py-3 text-gray-300 rounded-lg hover:text-white transition duration-200" onclick="showSection('moderation')">
+                        <i class="fas fa-shield-alt mr-3"></i>Moderation Logs
+                    </a>
+                    <a href="#commands" class="sidebar-item flex items-center px-4 py-3 text-gray-300 rounded-lg hover:text-white transition duration-200" onclick="showSection('commands')">
+                        <i class="fas fa-terminal mr-3"></i>Command Logs
+                    </a>
+                    <a href="#arma3" class="sidebar-item flex items-center px-4 py-3 text-gray-300 rounded-lg hover:text-white transition duration-200" onclick="showSection('arma3')">
+                        <i class="fas fa-gamepad mr-3"></i>Arma 3 Logs
+                    </a>
+                    <a href="#embed-editor" class="sidebar-item flex items-center px-4 py-3 text-gray-300 rounded-lg hover:text-white transition duration-200" onclick="showSection('embed-editor')">
+                        <i class="fas fa-edit mr-3"></i>Embed Editor
+                    </a>
+                    <a href="#settings" class="sidebar-item flex items-center px-4 py-3 text-gray-300 rounded-lg hover:text-white transition duration-200" onclick="showSection('settings')">
+                        <i class="fas fa-cog mr-3"></i>Settings
+                    </a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 p-8">
+            <!-- Dashboard Section -->
+            <div id="dashboard" class="section">
+                <div class="mb-8">
+                    <h2 class="text-3xl font-bold mb-2">Dashboard Overview</h2>
+                    <p class="text-gray-400">Monitor your Discord bot's performance and activities</p>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="card p-6 animate-fade-in">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-400 text-sm">Open Tickets</p>
+                                <p class="text-3xl font-bold text-blue-400" id="open-tickets">0</p>
+                            </div>
+                            <div class="p-3 bg-blue-600 rounded-full">
+                                <i class="fas fa-ticket-alt text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card p-6 animate-fade-in">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-400 text-sm">Mod Actions Today</p>
+                                <p class="text-3xl font-bold text-red-400" id="mod-actions">0</p>
+                            </div>
+                            <div class="p-3 bg-red-600 rounded-full">
+                                <i class="fas fa-shield-alt text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card p-6 animate-fade-in">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-400 text-sm">Commands Used</p>
+                                <p class="text-3xl font-bold text-green-400" id="commands-used">0</p>
+                            </div>
+                            <div class="p-3 bg-green-600 rounded-full">
+                                <i class="fas fa-terminal text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card p-6 animate-fade-in">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-400 text-sm">Arma 3 Players</p>
+                                <p class="text-3xl font-bold text-purple-400" id="arma-players">0</p>
+                            </div>
+                            <div class="p-3 bg-purple-600 rounded-full">
+                                <i class="fas fa-users text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                    <div class="card p-6">
+                        <h3 class="text-xl font-semibold mb-4">Activity Over Time</h3>
+                        <canvas id="activityChart" width="400" height="200"></canvas>
+                    </div>
+                    <div class="card p-6">
+                        <h3 class="text-xl font-semibold mb-4">Command Usage</h3>
+                        <canvas id="commandChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="card p-6">
+                    <h3 class="text-xl font-semibold mb-4">Recent Activity</h3>
+                    <div id="recent-activity" class="space-y-3">
+                        <!-- Activity items will be loaded here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Support Tickets Section -->
+            <div id="tickets" class="section hidden">
+                <div class="mb-8">
+                    <h2 class="text-3xl font-bold mb-2">Support Tickets</h2>
+                    <p class="text-gray-400">Manage and respond to user support requests</p>
+                </div>
+
+                <div class="card p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-semibold">All Tickets</h3>
+                        <div class="flex space-x-4">
+                            <select class="bg-gray-700 border border-gray-600 rounded px-3 py-2" onchange="filterTickets(this.value)">
+                                <option value="all">All Tickets</option>
+                                <option value="open">Open</option>
+                                <option value="closed">Closed</option>
+                            </select>
+                            <button onclick="refreshTickets()" class="btn-primary px-4 py-2 rounded">
+                                <i class="fas fa-refresh mr-2"></i>Refresh
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full table-auto">
+                            <thead class="bg-gray-700">
+                                <tr>
+                                    <th class="px-4 py-3 text-left">Ticket ID</th>
+                                    <th class="px-4 py-3 text-left">User</th>
+                                    <th class="px-4 py-3 text-left">Category</th>
+                                    <th class="px-4 py-3 text-left">Status</th>
+                                    <th class="px-4 py-3 text-left">Created</th>
+                                    <th class="px-4 py-3 text-left">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tickets-table" class="divide-y divide-gray-600">
+                                <!-- Tickets will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Moderation Logs Section -->
+            <div id="moderation" class="section hidden">
+                <div class="mb-8">
+                    <h2 class="text-3xl font-bold mb-2">Moderation Logs</h2>
+                    <p class="text-gray-400">Track all moderation actions and staff activities</p>
+                </div>
+
+                <div class="card p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-semibold">Recent Actions</h3>
+                        <button onclick="refreshModLogs()" class="btn-primary px-4 py-2 rounded">
+                            <i class="fas fa-refresh mr-2"></i>Refresh
+                        </button>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full table-auto">
+                            <thead class="bg-gray-700">
+                                <tr>
+                                    <th class="px-4 py-3 text-left">Action</th>
+                                    <th class="px-4 py-3 text-left">Moderator</th>
+                                    <th class="px-4 py-3 text-left">Target</th>
+                                    <th class="px-4 py-3 text-left">Reason</th>
+                                    <th class="px-4 py-3 text-left">Time</th>
+                                </tr>
+                            </thead>
+                            <tbody id="mod-logs-table" class="divide-y divide-gray-600">
+                                <!-- Mod logs will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Command Logs Section -->
+            <div id="commands" class="section hidden">
+                <div class="mb-8">
+                    <h2 class="text-3xl font-bold mb-2">Command Usage Logs</h2>
+                    <p class="text-gray-400">Monitor bot command usage and responses</p>
+                </div>
+
+                <div class="card p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-semibold">Command History</h3>
+                        <button onclick="refreshCommandLogs()" class="btn-primary px-4 py-2 rounded">
+                            <i class="fas fa-refresh mr-2"></i>Refresh
+                        </button>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full table-auto">
+                            <thead class="bg-gray-700">
+                                <tr>
+                                    <th class="px-4 py-3 text-left">Command</th>
+                                    <th class="px-4 py-3 text-left">User</th>
+                                    <th class="px-4 py-3 text-left">Channel</th>
+                                    <th class="px-4 py-3 text-left">Arguments</th>
+                                    <th class="px-4 py-3 text-left">Time</th>
+                                </tr>
+                            </thead>
+                            <tbody id="command-logs-table" class="divide-y divide-gray-600">
+                                <!-- Command logs will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Arma 3 Logs Section -->
+            <div id="arma3" class="section hidden">
+                <div class="mb-8">
+                    <h2 class="text-3xl font-bold mb-2">Arma 3 Server Logs</h2>
+                    <p class="text-gray-400">Monitor game server events and player activities</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <div class="card p-4">
+                        <h4 class="font-semibold mb-2">Players Online</h4>
+                        <p class="text-2xl font-bold text-green-400" id="current-players">0</p>
+                    </div>
+                    <div class="card p-4">
+                        <h4 class="font-semibold mb-2">Total Kills Today</h4>
+                        <p class="text-2xl font-bold text-red-400" id="total-kills">0</p>
+                    </div>
+                    <div class="card p-4">
+                        <h4 class="font-semibold mb-2">Server Status</h4>
+                        <p class="text-2xl font-bold status-online" id="server-status">Online</p>
+                    </div>
+                </div>
+
+                <div class="card p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-semibold">Game Events</h3>
+                        <div class="flex space-x-4">
+                            <select class="bg-gray-700 border border-gray-600 rounded px-3 py-2" onchange="filterArmaLogs(this.value)">
+                                <option value="all">All Events</option>
+                                <option value="connect">Connections</option>
+                                <option value="disconnect">Disconnections</option>
+                                <option value="kill">Kills</option>
+                                <option value="money">Money Events</option>
+                            </select>
+                            <button onclick="refreshArmaLogs()" class="btn-primary px-4 py-2 rounded">
+                                <i class="fas fa-refresh mr-2"></i>Refresh
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full table-auto">
+                            <thead class="bg-gray-700">
+                                <tr>
+                                    <th class="px-4 py-3 text-left">Event</th>
+                                    <th class="px-4 py-3 text-left">Player</th>
+                                    <th class="px-4 py-3 text-left">Details</th>
+                                    <th class="px-4 py-3 text-left">Server</th>
+                                    <th class="px-4 py-3 text-left">Time</th>
+                                </tr>
+                            </thead>
+                            <tbody id="arma-logs-table" class="divide-y divide-gray-600">
+                                <!-- Arma logs will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Embed Editor Section -->
+            <div id="embed-editor" class="section hidden">
+                <div class="mb-8">
+                    <h2 class="text-3xl font-bold mb-2">Embed Message Editor</h2>
+                    <p class="text-gray-400">Create and customize Discord embed messages</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="card p-6">
+                        <h3 class="text-xl font-semibold mb-4">Editor</h3>
+                        <form id="embed-form" class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Title</label>
+                                <input type="text" id="embed-title" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2" placeholder="Embed title">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Description</label>
+                                <textarea id="embed-description" rows="4" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2" placeholder="Embed description"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Color (Hex)</label>
+                                <input type="color" id="embed-color" class="w-full h-10 bg-gray-700 border border-gray-600 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Author</label>
+                                <input type="text" id="embed-author" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2" placeholder="Author name">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Footer</label>
+                                <input type="text" id="embed-footer" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2" placeholder="Footer text">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Image URL</label>
+                                <input type="url" id="embed-image" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2" placeholder="https://example.com/image.png">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Channel ID</label>
+                                <input type="text" id="embed-channel" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2" placeholder="Discord channel ID">
+                            </div>
+                            <div class="flex space-x-4">
+                                <button type="button" onclick="previewEmbed()" class="btn-primary px-4 py-2 rounded flex-1">
+                                    <i class="fas fa-eye mr-2"></i>Preview
+                                </button>
+                                <button type="button" onclick="sendEmbed()" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded flex-1">
+                                    <i class="fas fa-paper-plane mr-2"></i>Send
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="card p-6">
+                        <h3 class="text-xl font-semibold mb-4">Preview</h3>
+                        <div id="embed-preview" class="bg-gray-800 border-l-4 border-blue-500 p-4 rounded">
+                            <div class="text-lg font-semibold mb-2">Sample Embed Title</div>
+                            <div class="text-gray-300 mb-3">This is a sample embed description. Edit the form to see changes here.</div>
+                            <div class="text-xs text-gray-500">Sample Footer</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Section -->
+            <div id="settings" class="section hidden">
+                <div class="mb-8">
+                    <h2 class="text-3xl font-bold mb-2">Bot Settings</h2>
+                    <p class="text-gray-400">Configure bot behavior and features</p>
+                </div>
+
+                <div class="space-y-8">
+                    <div class="card p-6">
+                        <h3 class="text-xl font-semibold mb-4">AutoMod Configuration</h3>
+                        <form id="automod-form" class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" id="spam-detection" class="mr-2">
+                                        <span>Spam Detection</span>
+                                    </label>
+                                </div>
+                                <div>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" id="profanity-filter" class="mr-2">
+                                        <span>Profanity Filter</span>
+                                    </label>
+                                </div>
+                                <div>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" id="link-filter" class="mr-2">
+                                        <span>Link Filter</span>
+                                    </label>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Max Mentions</label>
+                                    <input type="number" id="max-mentions" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2" value="5">
+                                </div>
+                            </div>
+                            <button type="button" onclick="saveAutoModSettings()" class="btn-primary px-6 py-2 rounded">
+                                <i class="fas fa-save mr-2"></i>Save Settings
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="card p-6">
+                        <h3 class="text-xl font-semibold mb-4">Notification Channels</h3>
+                        <form class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Mod Log Channel ID</label>
+                                <input type="text" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2" placeholder="Channel ID for moderation logs">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Changelog Channel ID</label>
+                                <input type="text" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2" placeholder="Channel ID for GitHub releases">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Support Category ID</label>
+                                <input type="text" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2" placeholder="Category ID for support tickets">
+                            </div>
+                            <button type="button" class="btn-primary px-6 py-2 rounded">
+                                <i class="fas fa-save mr-2"></i>Save Channels
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentSection = 'dashboard';
+        let ticketsData = [];
+        let modLogsData = [];
+        let commandLogsData = [];
+        let armaLogsData = [];
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboardData();
+            initializeCharts();
+            setInterval(loadDashboardData, 30000); // Refresh every 30 seconds
+        });
+
+        // Navigation functions
+        function showSection(sectionName) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+            });
+            
+            // Show selected section
+            document.getElementById(sectionName).classList.remove('hidden');
+            currentSection = sectionName;
+            
+            // Update sidebar active state
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.classList.remove('bg-blue-600', 'text-white');
+            });
+            event.target.classList.add('bg-blue-600', 'text-white');
+            
+            // Load section-specific data
+            switch(sectionName) {
+                case 'tickets':
+                    loadTickets();
+                    break;
+                case 'moderation':
+                    loadModLogs();
+                    break;
+                case 'commands':
+                    loadCommandLogs();
+                    break;
+                case 'arma3':
+                    loadArmaLogs();
+                    break;
+            }
+        }
+
+        // Dashboard data loading
+        async function loadDashboardData() {
+            try {
+                // Load statistics
+                const tickets = await fetch('/api/tickets').then(r => r.json());
+                const modLogs = await fetch('/api/mod-logs').then(r => r.json());
+                const commandLogs = await fetch('/api/command-logs').then(r => r.json());
+                const armaLogs = await fetch('/api/arma3-logs').then(r => r.json());
+                
+                // Update stats cards
+                document.getElementById('open-tickets').textContent = tickets.filter(t => t.status === 'open').length;
+                document.getElementById('mod-actions').textContent = modLogs.filter(m => new Date(m.timestamp) > new Date(Date.now() - 24*60*60*1000)).length;
+                document.getElementById('commands-used').textContent = commandLogs.filter(c => new Date(c.timestamp) > new Date(Date.now() - 24*60*60*1000)).length;
+                document.getElementById('arma-players').textContent = armaLogs.filter(a => a.event_type === 'connect' && new Date(a.timestamp) > new Date(Date.now() - 60*60*1000)).length;
+                
+                // Update recent activity
+                updateRecentActivity([...modLogs, ...commandLogs, ...armaLogs].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 10));
+                
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        function updateRecentActivity(activities) {
+            const container = document.getElementById('recent-activity');
+            container.innerHTML = '';
+            
+            activities.forEach(activity => {
+                let icon, text, color;
+                
+                if (activity.action_type) {
+                    // Moderation log
+                    icon = 'fas fa-shield-alt';
+                    color = 'text-red-400';
+                    text = `${activity.moderator_name} ${activity.action_type} ${activity.target_name || 'someone'}`;
+                } else if (activity.command_name) {
+                    // Command log
+                    icon = 'fas fa-terminal';
+                    color = 'text-blue-400';
+                    text = `${activity.username} used /${activity.command_name}`;
+                } else if (activity.event_type) {
+                    // Arma log
+                    icon = 'fas fa-gamepad';
+                    color = 'text-green-400';
+                    text = `${activity.player_name} ${activity.event_type}${activity.target_name ? ` ${activity.target_name}` : ''}`;
+                }
+                
+                const activityItem = document.createElement('div');
+                activityItem.className = 'flex items-center p-3 bg-gray-700 rounded-lg';
+                activityItem.innerHTML = `
+                    <div class="p-2 bg-gray-600 rounded-full mr-3">
+                        <i class="${icon} ${color}"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm">${text}</p>
+                        <p class="text-xs text-gray-400">${new Date(activity.timestamp).toLocaleString()}</p>
+                    </div>
+                `;
+                container.appendChild(activityItem);
+            });
+        }
+
+        // Initialize charts
+        function initializeCharts() {
+            // Activity chart
+            const activityCtx = document.getElementById('activityChart').getContext('2d');
+            new Chart(activityCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Commands',
+                        data: [12, 19, 3, 5, 2, 3, 7],
+                        borderColor: 'rgb(59, 130, 246)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4
+                    }, {
+                        label: 'Tickets',
+                        data: [2, 4, 1, 3, 2, 1, 4],
+                        borderColor: 'rgb(16, 185, 129)',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: 'white'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: 'white' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        },
+                        y: {
+                            ticks: { color: 'white' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        }
+                    }
+                }
+            });
+
+            // Command usage chart
+            const commandCtx = document.getElementById('commandChart').getContext('2d');
+            new Chart(commandCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Kick', 'Ban', 'Timeout', 'Clear', 'Ticket'],
+                    datasets: [{
+                        data: [5, 3, 8, 12, 15],
+                        backgroundColor: [
+                            '#EF4444',
+                            '#DC2626',
+                            '#F59E0B',
+                            '#3B82F6',
+                            '#10B981'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: 'white'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Tickets functions
+        async function loadTickets() {
+            try {
+                const response = await fetch('/api/tickets');
+                ticketsData = await response.json();
+                displayTickets(ticketsData);
+            } catch (error) {
+                console.error('Error loading tickets:', error);
+            }
+        }
+
+        function displayTickets(tickets) {
+            const tbody = document.getElementById('tickets-table');
+            tbody.innerHTML = '';
+
+            tickets.forEach(ticket => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-4 py-3">${ticket.ticket_id}</td>
+                    <td class="px-4 py-3">${ticket.username}</td>
+                    <td class="px-4 py-3">
+                        <span class="px-2 py-1 text-xs rounded-full bg-blue-600">${ticket.category}</span>
+                    </td>
+                    <td class="px-4 py-3">
+                        <span class="px-2 py-1 text-xs rounded-full ${ticket.status === 'open' ? 'bg-green-600' : 'bg-gray-600'}">${ticket.status_display}</span>
+                    </td>
+                    <td class="px-4 py-3">${new Date(ticket.created_at).toLocaleString()}</td>
+                    <td class="px-4 py-3">
+                        <button onclick="viewTicket('${ticket.ticket_id}')" class="text-blue-400 hover:text-blue-300 mr-2">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        ${ticket.status === 'open' ? `<button onclick="closeTicket('${ticket.ticket_id}')" class="text-red-400 hover:text-red-300">
+                            <i class="fas fa-times"></i>
+                        </button>` : ''}
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function filterTickets(status) {
+            let filteredTickets = ticketsData;
+            if (status !== 'all') {
+                filteredTickets = ticketsData.filter(t => t.status === status);
+            }
+            displayTickets(filteredTickets);
+        }
+
+        function refreshTickets() {
+            loadTickets();
+        }
+
+        // Moderation logs functions
+        async function loadModLogs() {
+            try {
+                const response = await fetch('/api/mod-logs');
+                modLogsData = await response.json();
+                displayModLogs(modLogsData);
+            } catch (error) {
+                console.error('Error loading mod logs:', error);
+            }
+        }
+
+        function displayModLogs(logs) {
+            const tbody = document.getElementById('mod-logs-table');
+            tbody.innerHTML = '';
+
+            logs.forEach(log => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-4 py-3">
+                        <span class="px-2 py-1 text-xs rounded-full bg-red-600">${log.action_type}</span>
+                    </td>
+                    <td class="px-4 py-3">${log.moderator_name}</td>
+                    <td class="px-4 py-3">${log.target_name || 'N/A'}</td>
+                    <td class="px-4 py-3">${log.reason || 'No reason'}</td>
+                    <td class="px-4 py-3">${new Date(log.timestamp).toLocaleString()}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function refreshModLogs() {
+            loadModLogs();
+        }
+
+        // Command logs functions
+        async function loadCommandLogs() {
+            try {
+                const response = await fetch('/api/command-logs');
+                commandLogsData = await response.json();
+                displayCommandLogs(commandLogsData);
+            } catch (error) {
+                console.error('Error loading command logs:', error);
+            }
+        }
+
+        function displayCommandLogs(logs) {
+            const tbody = document.getElementById('command-logs-table');
+            tbody.innerHTML = '';
+
+            logs.forEach(log => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-4 py-3">
+                        <span class="px-2 py-1 text-xs rounded-full bg-blue-600">/${log.command_name}</span>
+                    </td>
+                    <td class="px-4 py-3">${log.username}</td>
+                    <td class="px-4 py-3">${log.channel_name}</td>
+                    <td class="px-4 py-3">${log.arguments || 'None'}</td>
+                    <td class="px-4 py-3">${new Date(log.timestamp).toLocaleString()}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function refreshCommandLogs() {
+            loadCommandLogs();
+        }
+
+        // Arma 3 logs functions
+        async function loadArmaLogs() {
+            try {
+                const response = await fetch('/api/arma3-logs');
+                armaLogsData = await response.json();
+                displayArmaLogs(armaLogsData);
+                updateArmaStats(armaLogsData);
+            } catch (error) {
+                console.error('Error loading Arma logs:', error);
+            }
+        }
+
+        function displayArmaLogs(logs) {
+            const tbody = document.getElementById('arma-logs-table');
+            tbody.innerHTML = '';
+
+            logs.forEach(log => {
+                const row = document.createElement('tr');
+                let details = '';
+                
+                switch(log.event_type) {
+                    case 'kill':
+                        details = `Killed ${log.target_name} with ${log.weapon} (${log.distance}m)`;
+                        break;
+                    case 'money':
+                        details = `Money: ${log.money_amount}`;
+                        break;
+                    case 'connect':
+                        details = 'Connected to server';
+                        break;
+                    case 'disconnect':
+                        details = 'Disconnected from server';
+                        break;
+                    default:
+                        details = 'Unknown event';
+                }
+
+                row.innerHTML = `
+                    <td class="px-4 py-3">
+                        <span class="px-2 py-1 text-xs rounded-full ${getEventColor(log.event_type)}">${log.event_type}</span>
+                    </td>
+                    <td class="px-4 py-3">${log.player_name}</td>
+                    <td class="px-4 py-3">${details}</td>
+                    <td class="px-4 py-3">${log.server_name || 'Unknown'}</td>
+                    <td class="px-4 py-3">${new Date(log.timestamp).toLocaleString()}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function getEventColor(eventType) {
+            switch(eventType) {
+                case 'connect': return 'bg-green-600';
+                case 'disconnect': return 'bg-red-600';
+                case 'kill': return 'bg-orange-600';
+                case 'money': return 'bg-yellow-600';
+                default: return 'bg-gray-600';
+            }
+        }
+
+        function updateArmaStats(logs) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            const todayLogs = logs.filter(log => new Date(log.timestamp) >= today);
+            const kills = todayLogs.filter(log => log.event_type === 'kill').length;
+            const currentConnections = logs.filter(log => log.event_type === 'connect' && new Date(log.timestamp) > new Date(Date.now() - 60*60*1000)).length;
+            
+            document.getElementById('current-players').textContent = currentConnections;
+            document.getElementById('total-kills').textContent = kills;
+            document.getElementById('server-status').textContent = 'Online'; // This would come from server monitoring
+        }
+
+        function filterArmaLogs(eventType) {
+            let filteredLogs = armaLogsData;
+            if (eventType !== 'all') {
+                filteredLogs = armaLogsData.filter(log => log.event_type === eventType);
+            }
+            displayArmaLogs(filteredLogs);
+        }
+
+        function refreshArmaLogs() {
+            loadArmaLogs();
+        }
+
+        // Embed editor functions
+        function previewEmbed() {
+            const title = document.getElementById('embed-title').value || 'Sample Embed Title';
+            const description = document.getElementById('embed-description').value || 'This is a sample embed description.';
+            const color = document.getElementById('embed-color').value;
+            const author = document.getElementById('embed-author').value;
+            const footer = document.getElementById('embed-footer').value || 'Sample Footer';
+            const image = document.getElementById('embed-image').value;
+            
+            const preview = document.getElementById('embed-preview');
+            preview.style.borderLeftColor = color;
+            
+            let html = '';
+            if (author) {
+                html += `<div class="text-sm font-medium mb-2">${author}</div>`;
+            }
+            html += `<div class="text-lg font-semibold mb-2">${title}</div>`;
+            html += `<div class="text-gray-300 mb-3">${description}</div>`;
+            if (image) {
+                html += `<img src="${image}" alt="Embed image" class="max-w-full h-auto rounded mb-3">`;
+            }
+            html += `<div class="text-xs text-gray-500">${footer}</div>`;
+            
+            preview.innerHTML = html;
+        }
+
+        async function sendEmbed() {
+            const embedData = {
+                title: document.getElementById('embed-title').value,
+                description: document.getElementById('embed-description').value,
+                color: parseInt(document.getElementById('embed-color').value.replace('#', ''), 16),
+                author: document.getElementById('embed-author').value,
+                footer: document.getElementById('embed-footer').value,
+                image: document.getElementById('embed-image').value,
+                channelId: document.getElementById('embed-channel').value
+            };
+            
+            try {
+                const response = await fetch('/api/send-embed', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(embedData)
+                });
+                
+                if (response.ok) {
+                    alert('Embed sent successfully!');
+                    document.getElementById('embed-form').reset();
+                } else {
+                    alert('Failed to send embed. Please check the channel ID and try again.');
+                }
+            } catch (error) {
+                console.error('Error sending embed:', error);
+                alert('An error occurred while sending the embed.');
+            }
+        }
+
+        // Settings functions
+        async function saveAutoModSettings() {
+            const settings = {
+                spam_detection: document.getElementById('spam-detection').checked,
+                profanity_filter: document.getElementById('profanity-filter').checked,
+                link_filter: document.getElementById('link-filter').checked,
+                max_mentions: document.getElementById('max-mentions').value
+            };
+            
+            try {
+                const response = await fetch('/api/automod-settings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(settings)
+                });
+                
+                if (response.ok) {
+                    alert('AutoMod settings saved successfully!');
+                } else {
+                    alert('Failed to save settings.');
+                }
+            } catch (error) {
+                console.error('Error saving settings:', error);
+                alert('An error occurred while saving settings.');
+            }
+        }
+
+        // Utility functions
+        function logout() {
+            window.location.href = '/logout';
+        }
+
+        function viewTicket(ticketId) {
+            // Implement ticket viewing modal
+            alert(`View ticket: ${ticketId}`);
+        }
+
+        function closeTicket(ticketId) {
+            if (confirm('Are you sure you want to close this ticket?')) {
+                // Implement ticket closing
+                alert(`Close ticket: ${ticketId}`);
+            }
+        }
+    </script>
+</body>
+</html>
