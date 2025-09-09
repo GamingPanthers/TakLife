@@ -94,7 +94,10 @@
                         <i class="fas fa-gamepad mr-3"></i>Arma 3 Logs
                     </a>
                     <a href="#embed-editor" class="sidebar-item flex items-center px-4 py-3 text-gray-300 rounded-lg hover:text-white transition duration-200" onclick="showSection('embed-editor')">
-                        <i class="fas fa-edit mr-3"></i>Embed Editor
+                        <i class="fas fa-edit mr-3"></i>Embed Manager
+                    </a>
+                    <a href="#welcome-settings" class="sidebar-item flex items-center px-4 py-3 text-gray-300 rounded-lg hover:text-white transition duration-200" onclick="showSection('welcome-settings')">
+                        <i class="fas fa-hand-paper mr-3"></i>Welcome & Verification
                     </a>
                     <a href="#settings" class="sidebar-item flex items-center px-4 py-3 text-gray-300 rounded-lg hover:text-white transition duration-200" onclick="showSection('settings')">
                         <i class="fas fa-cog mr-3"></i>Settings
@@ -352,14 +355,304 @@
                 </div>
             </div>
 
-            <!-- Embed Editor Section -->
+            <!-- Enhanced Embed Manager Section -->
             <div id="embed-editor" class="section hidden">
                 <div class="mb-8">
-                    <h2 class="text-3xl font-bold mb-2">Embed Message Editor</h2>
-                    <p class="text-gray-400">Create and customize Discord embed messages</p>
+                    <h2 class="text-3xl font-bold mb-2">Enhanced Embed Manager</h2>
+                    <p class="text-gray-400">Create, edit, and manage reusable Discord embed messages</p>
                 </div>
 
+                <!-- Embed Library -->
+                <div class="card p-6 mb-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-semibold">Saved Embeds</h3>
+                        <button onclick="showCreateEmbedForm()" class="btn-primary px-4 py-2 rounded">
+                            <i class="fas fa-plus mr-2"></i>Create New Embed
+                        </button>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="embed-library">
+                        <!-- Embed cards will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Embed Editor Form -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="card p-6">
+                        <h3 class="text-xl font-semibold mb-4" id="embed-form-title">Create New Embed</h3>
+                        <form id="embed-form" class="space-y-4">
+                            <input type="hidden" id="embed-id" value="">
+                            
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Embed Name *</label>
+                                <input type="text" id="embed-name" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2" placeholder="Unique embed name" required>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Title</label>
+                                <input type="text" id="embed-title" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2" placeholder="Embed title">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Description</label>
+                                <textarea id="embed-description" rows="4" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2" placeholder="Embed description with {user}, {username}, {server}, {membercount} placeholders"></textarea>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Color</label>
+                                <input type="color" id="embed-color" class="w-full h-10 bg-gray-700 border border-gray-600 rounded" value="#0099ff">
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Author Name</label>
+                                    <input type="text" id="embed-author" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2" placeholder="Author name">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Author Icon URL</label>
+                                    <input type="url" id="embed-author-icon" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2" placeholder="https://...">
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Footer Text</label>
+                                    <input type="text" id="embed-footer" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2" placeholder="Footer text">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">Footer Icon URL</label>
+                                    <input type="url" id="embed-footer-icon" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2" placeholder="https://...">
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Image URL</label>
+                                <input type="url" id="embed-image" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2" placeholder="https://example.com/image.png">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Thumbnail URL</label>
+                                <input type="url" id="embed-thumbnail" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2" placeholder="https://example.com/thumb.png">
+                            </div>
+                            
+                            <!-- Fields Section -->
+                            <div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <label class="block text-sm font-medium">Fields</label>
+                                    <button type="button" onclick="addEmbedField()" class="text-blue-400 hover:text-blue-300 text-sm">
+                                        <i class="fas fa-plus mr-1"></i>Add Field
+                                    </button>
+                                </div>
+                                <div id="embed-fields-container">
+                                    <!-- Fields will be added here -->
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Send to Channel (Optional)</label>
+                                <input type="text" id="embed-channel" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2" placeholder="Discord channel ID">
+                            </div>
+                            
+                            <div class="flex space-x-4">
+                                <button type="button" onclick="previewEmbed()" class="btn-primary px-4 py-2 rounded flex-1">
+                                    <i class="fas fa-eye mr-2"></i>Preview
+                                </button>
+                                <button type="button" onclick="saveEmbed()" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded flex-1">
+                                    <i class="fas fa-save mr-2"></i><span id="save-button-text">Save</span>
+                                </button>
+                                <button type="button" onclick="sendEmbed()" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded flex-1">
+                                    <i class="fas fa-paper-plane mr-2"></i>Send
+                                </button>
+                            </div>
+                            
+                            <button type="button" onclick="resetEmbedForm()" class="w-full bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded">
+                                <i class="fas fa-refresh mr-2"></i>Reset Form
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="card p-6">
+                        <h3 class="text-xl font-semibold mb-4">Live Preview</h3>
+                        <div id="embed-preview" class="bg-gray-800 border-l-4 border-blue-500 p-4 rounded min-h-32">
+                            <div class="text-lg font-semibold mb-2">Sample Embed Title</div>
+                            <div class="text-gray-300 mb-3">This is a sample embed description. Edit the form to see changes here.</div>
+                            <div class="text-xs text-gray-500">Sample Footer</div>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <h4 class="font-medium mb-2">Available Placeholders:</h4>
+                            <div class="text-sm text-gray-400 space-y-1">
+                                <div><code class="bg-gray-700 px-2 py-1 rounded">{user}</code> - User mention</div>
+                                <div><code class="bg-gray-700 px-2 py-1 rounded">{username}</code> - Username</div>
+                                <div><code class="bg-gray-700 px-2 py-1 rounded">{server}</code> - Server name</div>
+                                <div><code class="bg-gray-700 px-2 py-1 rounded">{membercount}</code> - Member count</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Welcome & Verification Settings -->
+            <div id="welcome-settings" class="section hidden">
+                <div class="mb-8">
+                    <h2 class="text-3xl font-bold mb-2">Welcome & Verification System</h2>
+                    <p class="text-gray-400">Configure welcome messages, leave messages, and member verification</p>
+                </div>
+
+                <div class="space-y-8">
+                    <!-- Welcome Messages -->
+                    <div class="card p-6">
+                        <h3 class="text-xl font-semibold mb-4 flex items-center">
+                            <i class="fas fa-hand-paper mr-2 text-green-400"></i>Welcome Messages
+                        </h3>
+                        
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div>
+                                <label class="flex items-center mb-4">
+                                    <input type="checkbox" id="welcome-enabled" class="mr-2">
+                                    <span class="font-medium">Enable Welcome Messages</span>
+                                </label>
+                                
+                                <div id="welcome-config" class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">Welcome Channel ID</label>
+                                        <input type="text" id="welcome-channel" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2" placeholder="Channel ID for welcome messages">
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">Welcome Message</label>
+                                        <textarea id="welcome-message" rows="3" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2" placeholder="Welcome to {server}, {user}! We now have {membercount} members!"></textarea>
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">Welcome Embed (Optional)</label>
+                                        <select id="welcome-embed" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2">
+                                            <option value="">No embed</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <button onclick="testWelcome()" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded mb-4">
+                                    <i class="fas fa-play mr-2"></i>Test Welcome Message
+                                </button>
+                                
+                                <div class="bg-gray-800 p-4 rounded">
+                                    <h4 class="font-medium mb-2">Preview:</h4>
+                                    <div id="welcome-preview" class="text-gray-300">
+                                        Configure welcome message to see preview
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Leave Messages -->
+                    <div class="card p-6">
+                        <h3 class="text-xl font-semibold mb-4 flex items-center">
+                            <i class="fas fa-door-open mr-2 text-orange-400"></i>Leave Messages
+                        </h3>
+                        
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div>
+                                <label class="flex items-center mb-4">
+                                    <input type="checkbox" id="leave-enabled" class="mr-2">
+                                    <span class="font-medium">Enable Leave Messages</span>
+                                </label>
+                                
+                                <div id="leave-config" class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">Leave Channel ID</label>
+                                        <input type="text" id="leave-channel" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2" placeholder="Channel ID for leave messages">
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">Leave Message</label>
+                                        <textarea id="leave-message" rows="3" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2" placeholder="{username} has left {server}. We now have {membercount} members."></textarea>
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">Leave Embed (Optional)</label>
+                                        <select id="leave-embed" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2">
+                                            <option value="">No embed</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <button onclick="testLeave()" class="bg-orange-600 hover:bg-orange-700 px-4 py-2 rounded mb-4">
+                                    <i class="fas fa-play mr-2"></i>Test Leave Message
+                                </button>
+                                
+                                <div class="bg-gray-800 p-4 rounded">
+                                    <h4 class="font-medium mb-2">Preview:</h4>
+                                    <div id="leave-preview" class="text-gray-300">
+                                        Configure leave message to see preview
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Verification System -->
+                    <div class="card p-6">
+                        <h3 class="text-xl font-semibold mb-4 flex items-center">
+                            <i class="fas fa-shield-check mr-2 text-blue-400"></i>Member Verification
+                        </h3>
+                        
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div>
+                                <label class="flex items-center mb-4">
+                                    <input type="checkbox" id="verification-enabled" class="mr-2">
+                                    <span class="font-medium">Enable Member Verification</span>
+                                </label>
+                                
+                                <div id="verification-config" class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">Verification Channel ID</label>
+                                        <input type="text" id="verification-channel" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2" placeholder="Channel ID for verification">
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">Verified Role ID</label>
+                                        <input type="text" id="verification-role" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2" placeholder="Role ID to assign when verified">
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">Verification Message</label>
+                                        <textarea id="verification-message" rows="3" class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2" placeholder="Please react with ✅ to verify and gain access to the server."></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <button onclick="createVerification()" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded mb-4">
+                                    <i class="fas fa-shield-check mr-2"></i>Create Verification Message
+                                </button>
+                                
+                                <div class="bg-gray-800 p-4 rounded">
+                                    <h4 class="font-medium mb-2">How it works:</h4>
+                                    <ol class="text-sm text-gray-300 space-y-1">
+                                        <li>1. New members join and see welcome message</li>
+                                        <li>2. They must react ✅ to verification message</li>
+                                        <li>3. Bot automatically assigns verified role</li>
+                                        <li>4. Member gains full server access</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Save Button -->
+                    <div class="flex justify-center">
+                        <button onclick="saveWelcomeSettings()" class="btn-primary px-8 py-3 rounded-lg text-lg">
+                            <i class="fas fa-save mr-2"></i>Save All Settings
+                        </button>
+                    </div>
+                </div>
+            </div>d-cols-2 gap-8">
                     <div class="card p-6">
                         <h3 class="text-xl font-semibold mb-4">Editor</h3>
                         <form id="embed-form" class="space-y-4">
@@ -486,6 +779,746 @@
         let modLogsData = [];
         let commandLogsData = [];
         let armaLogsData = [];
+        let embedsData = [];
+        let currentEmbedId = null;
+        let embedFieldCounter = 0;
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboardData();
+            initializeCharts();
+            setInterval(loadDashboardData, 30000); // Refresh every 30 seconds
+        });
+
+        // Navigation functions
+        function showSection(sectionName) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+            });
+            
+            // Show selected section
+            document.getElementById(sectionName).classList.remove('hidden');
+            currentSection = sectionName;
+            
+            // Update sidebar active state
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.classList.remove('bg-blue-600', 'text-white');
+            });
+            event.target.classList.add('bg-blue-600', 'text-white');
+            
+            // Load section-specific data
+            switch(sectionName) {
+                case 'tickets':
+                    loadTickets();
+                    break;
+                case 'moderation':
+                    loadModLogs();
+                    break;
+                case 'commands':
+                    loadCommandLogs();
+                    break;
+                case 'arma3':
+                    loadArmaLogs();
+                    break;
+                case 'embed-editor':
+                    loadEmbeds();
+                    loadEmbedOptions();
+                    break;
+                case 'welcome-settings':
+                    loadWelcomeSettings();
+                    loadEmbedOptions();
+                    break;
+            }
+        }
+
+        // Dashboard data loading
+        async function loadDashboardData() {
+            try {
+                // Load statistics
+                const tickets = await fetch('/api/tickets').then(r => r.json());
+                const modLogs = await fetch('/api/mod-logs').then(r => r.json());
+                const commandLogs = await fetch('/api/command-logs').then(r => r.json());
+                const armaLogs = await fetch('/api/arma3-logs').then(r => r.json());
+                
+                // Update stats cards
+                document.getElementById('open-tickets').textContent = tickets.filter(t => t.status === 'open').length;
+                document.getElementById('mod-actions').textContent = modLogs.filter(m => new Date(m.timestamp) > new Date(Date.now() - 24*60*60*1000)).length;
+                document.getElementById('commands-used').textContent = commandLogs.filter(c => new Date(c.timestamp) > new Date(Date.now() - 24*60*60*1000)).length;
+                document.getElementById('arma-players').textContent = armaLogs.filter(a => a.event_type === 'connect' && new Date(a.timestamp) > new Date(Date.now() - 60*60*1000)).length;
+                
+                // Update recent activity
+                updateRecentActivity([...modLogs, ...commandLogs, ...armaLogs].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 10));
+                
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        function updateRecentActivity(activities) {
+            const container = document.getElementById('recent-activity');
+            container.innerHTML = '';
+            
+            activities.forEach(activity => {
+                let icon, text, color;
+                
+                if (activity.action_type) {
+                    // Moderation log
+                    icon = 'fas fa-shield-alt';
+                    color = 'text-red-400';
+                    text = `${activity.moderator_name} ${activity.action_type} ${activity.target_name || 'someone'}`;
+                } else if (activity.command_name) {
+                    // Command log
+                    icon = 'fas fa-terminal';
+                    color = 'text-blue-400';
+                    text = `${activity.username} used /${activity.command_name}`;
+                } else if (activity.event_type) {
+                    // Arma log
+                    icon = 'fas fa-gamepad';
+                    color = 'text-green-400';
+                    text = `${activity.player_name} ${activity.event_type}${activity.target_name ? ` ${activity.target_name}` : ''}`;
+                }
+                
+                const activityItem = document.createElement('div');
+                activityItem.className = 'flex items-center p-3 bg-gray-700 rounded-lg';
+                activityItem.innerHTML = `
+                    <div class="p-2 bg-gray-600 rounded-full mr-3">
+                        <i class="${icon} ${color}"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm">${text}</p>
+                        <p class="text-xs text-gray-400">${new Date(activity.timestamp).toLocaleString()}</p>
+                    </div>
+                `;
+                container.appendChild(activityItem);
+            });
+        }
+
+        // Initialize charts
+        function initializeCharts() {
+            // Activity chart
+            const activityCtx = document.getElementById('activityChart').getContext('2d');
+            new Chart(activityCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Commands',
+                        data: [12, 19, 3, 5, 2, 3, 7],
+                        borderColor: 'rgb(59, 130, 246)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4
+                    }, {
+                        label: 'Tickets',
+                        data: [2, 4, 1, 3, 2, 1, 4],
+                        borderColor: 'rgb(16, 185, 129)',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: 'white'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: 'white' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        },
+                        y: {
+                            ticks: { color: 'white' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        }
+                    }
+                }
+            });
+
+            // Command usage chart
+            const commandCtx = document.getElementById('commandChart').getContext('2d');
+            new Chart(commandCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Kick', 'Ban', 'Timeout', 'Clear', 'Ticket'],
+                    datasets: [{
+                        data: [5, 3, 8, 12, 15],
+                        backgroundColor: [
+                            '#EF4444',
+                            '#DC2626',
+                            '#F59E0B',
+                            '#3B82F6',
+                            '#10B981'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: 'white'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Enhanced Embed Functions
+        async function loadEmbeds() {
+            try {
+                const response = await fetch('/api/embeds');
+                embedsData = await response.json();
+                displayEmbedLibrary(embedsData);
+            } catch (error) {
+                console.error('Error loading embeds:', error);
+            }
+        }
+
+        function displayEmbedLibrary(embeds) {
+            const container = document.getElementById('embed-library');
+            container.innerHTML = '';
+
+            if (embeds.length === 0) {
+                container.innerHTML = '<div class="col-span-full text-center text-gray-400 py-8">No saved embeds yet. Create your first embed!</div>';
+                return;
+            }
+
+            embeds.forEach(embed => {
+                const embedCard = document.createElement('div');
+                embedCard.className = 'bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition duration-200';
+                embedCard.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <h4 class="font-semibold text-lg">${embed.name}</h4>
+                        <div class="flex space-x-2">
+                            <button onclick="editEmbed(${embed.id})" class="text-blue-400 hover:text-blue-300">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="deleteEmbed(${embed.id})" class="text-red-400 hover:text-red-300">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="text-sm text-gray-300 mb-2">${embed.title || 'No title'}</div>
+                    <div class="text-xs text-gray-400 mb-3">${embed.description ? embed.description.substring(0, 100) + '...' : 'No description'}</div>
+                    <div class="flex space-x-2">
+                        <button onclick="useEmbed(${embed.id})" class="bg-green-600 hover:bg-green-700 px-3 py-1 rounded text-xs">
+                            <i class="fas fa-paper-plane mr-1"></i>Send
+                        </button>
+                        <button onclick="previewStoredEmbed(${embed.id})" class="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-xs">
+                            <i class="fas fa-eye mr-1"></i>Preview
+                        </button>
+                    </div>
+                    <div class="text-xs text-gray-500 mt-2">
+                        Created by ${embed.created_by} • ${new Date(embed.created_at).toLocaleDateString()}
+                    </div>
+                `;
+                container.appendChild(embedCard);
+            });
+        }
+
+        async function loadEmbedOptions() {
+            try {
+                const response = await fetch('/api/embeds');
+                const embeds = await response.json();
+                
+                // Populate embed select options
+                const welcomeSelect = document.getElementById('welcome-embed');
+                const leaveSelect = document.getElementById('leave-embed');
+                
+                if (welcomeSelect) {
+                    welcomeSelect.innerHTML = '<option value="">No embed</option>';
+                    embeds.forEach(embed => {
+                        welcomeSelect.innerHTML += `<option value="${embed.id}">${embed.name}</option>`;
+                    });
+                }
+                
+                if (leaveSelect) {
+                    leaveSelect.innerHTML = '<option value="">No embed</option>';
+                    embeds.forEach(embed => {
+                        leaveSelect.innerHTML += `<option value="${embed.id}">${embed.name}</option>`;
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading embed options:', error);
+            }
+        }
+
+        function showCreateEmbedForm() {
+            resetEmbedForm();
+            document.getElementById('embed-form-title').textContent = 'Create New Embed';
+            document.getElementById('save-button-text').textContent = 'Save';
+        }
+
+        function addEmbedField() {
+            const container = document.getElementById('embed-fields-container');
+            const fieldId = embedFieldCounter++;
+            
+            const fieldDiv = document.createElement('div');
+            fieldDiv.className = 'border border-gray-600 rounded p-3 mb-2';
+            fieldDiv.id = `field-${fieldId}`;
+            fieldDiv.innerHTML = `
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm font-medium">Field ${fieldId + 1}</span>
+                    <button type="button" onclick="removeEmbedField(${fieldId})" class="text-red-400 hover:text-red-300 text-sm">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 gap-2">
+                    <input type="text" class="field-name w-full bg-gray-700 border border-gray-600 rounded px-2 py-1 text-sm" placeholder="Field name" />
+                    <textarea class="field-value w-full bg-gray-700 border border-gray-600 rounded px-2 py-1 text-sm" rows="2" placeholder="Field value"></textarea>
+                    <label class="flex items-center text-sm">
+                        <input type="checkbox" class="field-inline mr-2" />
+                        Inline field
+                    </label>
+                </div>
+            `;
+            
+            container.appendChild(fieldDiv);
+        }
+
+        function removeEmbedField(fieldId) {
+            const fieldDiv = document.getElementById(`field-${fieldId}`);
+            if (fieldDiv) {
+                fieldDiv.remove();
+            }
+        }
+
+        function getEmbedFields() {
+            const fields = [];
+            const fieldContainers = document.querySelectorAll('#embed-fields-container > div');
+            
+            fieldContainers.forEach(container => {
+                const nameInput = container.querySelector('.field-name');
+                const valueInput = container.querySelector('.field-value');
+                const inlineInput = container.querySelector('.field-inline');
+                
+                if (nameInput.value && valueInput.value) {
+                    fields.push({
+                        name: nameInput.value,
+                        value: valueInput.value,
+                        inline: inlineInput.checked
+                    });
+                }
+            });
+            
+            return fields;
+        }
+
+        async function saveEmbed() {
+            const embedData = {
+                name: document.getElementById('embed-name').value,
+                title: document.getElementById('embed-title').value,
+                description: document.getElementById('embed-description').value,
+                color: parseInt(document.getElementById('embed-color').value.replace('#', ''), 16),
+                author_name: document.getElementById('embed-author').value,
+                author_icon: document.getElementById('embed-author-icon').value,
+                footer_text: document.getElementById('embed-footer').value,
+                footer_icon: document.getElementById('embed-footer-icon').value,
+                image_url: document.getElementById('embed-image').value,
+                thumbnail_url: document.getElementById('embed-thumbnail').value,
+                fields: getEmbedFields()
+            };
+            
+            if (!embedData.name) {
+                alert('Please enter an embed name');
+                return;
+            }
+            
+            try {
+                let response;
+                if (currentEmbedId) {
+                    response = await fetch(`/api/embeds/${currentEmbedId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(embedData)
+                    });
+                } else {
+                    response = await fetch('/api/embeds', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(embedData)
+                    });
+                }
+                
+                if (response.ok) {
+                    alert('Embed saved successfully!');
+                    loadEmbeds();
+                    loadEmbedOptions();
+                    if (!currentEmbedId) resetEmbedForm();
+                } else {
+                    const error = await response.json();
+                    alert('Error: ' + error.error);
+                }
+            } catch (error) {
+                console.error('Save embed error:', error);
+                alert('An error occurred while saving the embed.');
+            }
+        }
+
+        async function editEmbed(embedId) {
+            try {
+                const response = await fetch(`/api/embeds/${embedId}`);
+                const embed = await response.json();
+                
+                currentEmbedId = embedId;
+                document.getElementById('embed-form-title').textContent = 'Edit Embed';
+                document.getElementById('save-button-text').textContent = 'Update';
+                
+                // Populate form
+                document.getElementById('embed-id').value = embed.id;
+                document.getElementById('embed-name').value = embed.name || '';
+                document.getElementById('embed-title').value = embed.title || '';
+                document.getElementById('embed-description').value = embed.description || '';
+                document.getElementById('embed-color').value = embed.color ? '#' + embed.color.toString(16).padStart(6, '0') : '#0099ff';
+                document.getElementById('embed-author').value = embed.author_name || '';
+                document.getElementById('embed-author-icon').value = embed.author_icon || '';
+                document.getElementById('embed-footer').value = embed.footer_text || '';
+                document.getElementById('embed-footer-icon').value = embed.footer_icon || '';
+                document.getElementById('embed-image').value = embed.image_url || '';
+                document.getElementById('embed-thumbnail').value = embed.thumbnail_url || '';
+                
+                // Clear existing fields
+                document.getElementById('embed-fields-container').innerHTML = '';
+                embedFieldCounter = 0;
+                
+                // Add existing fields
+                if (embed.fields) {
+                    const fields = typeof embed.fields === 'string' ? JSON.parse(embed.fields) : embed.fields;
+                    fields.forEach(field => {
+                        addEmbedField();
+                        const container = document.getElementById(`field-${embedFieldCounter - 1}`);
+                        container.querySelector('.field-name').value = field.name;
+                        container.querySelector('.field-value').value = field.value;
+                        container.querySelector('.field-inline').checked = field.inline;
+                    });
+                }
+                
+                previewEmbed();
+            } catch (error) {
+                console.error('Edit embed error:', error);
+                alert('Error loading embed for editing.');
+            }
+        }
+
+        async function deleteEmbed(embedId) {
+            if (!confirm('Are you sure you want to delete this embed?')) return;
+            
+            try {
+                const response = await fetch(`/api/embeds/${embedId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    alert('Embed deleted successfully!');
+                    loadEmbeds();
+                    loadEmbedOptions();
+                } else {
+                    alert('Error deleting embed.');
+                }
+            } catch (error) {
+                console.error('Delete embed error:', error);
+                alert('An error occurred while deleting the embed.');
+            }
+        }
+
+        function resetEmbedForm() {
+            currentEmbedId = null;
+            document.getElementById('embed-form').reset();
+            document.getElementById('embed-fields-container').innerHTML = '';
+            embedFieldCounter = 0;
+            document.getElementById('embed-color').value = '#0099ff';
+            previewEmbed();
+        }
+
+        function previewEmbed() {
+            const title = document.getElementById('embed-title').value || 'Sample Embed Title';
+            const description = document.getElementById('embed-description').value || 'This is a sample embed description with {user} placeholder.';
+            const color = document.getElementById('embed-color').value;
+            const author = document.getElementById('embed-author').value;
+            const footer = document.getElementById('embed-footer').value || 'Sample Footer';
+            const image = document.getElementById('embed-image').value;
+            const thumbnail = document.getElementById('embed-thumbnail').value;
+            const fields = getEmbedFields();
+            
+            const preview = document.getElementById('embed-preview');
+            preview.style.borderLeftColor = color;
+            
+            let html = '';
+            
+            // Author
+            if (author) {
+                html += `<div class="text-sm font-medium mb-2 flex items-center">`;
+                if (document.getElementById('embed-author-icon').value) {
+                    html += `<img src="${document.getElementById('embed-author-icon').value}" alt="Author" class="w-5 h-5 rounded-full mr-2">`;
+                }
+                html += `${author}</div>`;
+            }
+            
+            // Title and thumbnail
+            html += `<div class="flex justify-between items-start">`;
+            html += `<div class="flex-1">`;
+            html += `<div class="text-lg font-semibold mb-2">${title}</div>`;
+            html += `<div class="text-gray-300 mb-3">${description}</div>`;
+            
+            // Fields
+            if (fields.length > 0) {
+                html += `<div class="grid ${fields.some(f => f.inline) ? 'grid-cols-3 gap-2' : 'grid-cols-1 gap-2'} mb-3">`;
+                fields.forEach(field => {
+                    html += `<div class="${field.inline ? 'col-span-1' : 'col-span-full'}">`;
+                    html += `<div class="font-medium text-sm">${field.name}</div>`;
+                    html += `<div class="text-gray-300 text-sm">${field.value}</div>`;
+                    html += `</div>`;
+                });
+                html += `</div>`;
+            }
+            
+            html += `</div>`;
+            
+            // Thumbnail
+            if (thumbnail) {
+                html += `<img src="${thumbnail}" alt="Thumbnail" class="w-20 h-20 rounded ml-4">`;
+            }
+            html += `</div>`;
+            
+            // Image
+            if (image) {
+                html += `<img src="${image}" alt="Embed image" class="max-w-full h-auto rounded mb-3 mt-2">`;
+            }
+            
+            // Footer
+            html += `<div class="text-xs text-gray-500 flex items-center">`;
+            if (document.getElementById('embed-footer-icon').value) {
+                html += `<img src="${document.getElementById('embed-footer-icon').value}" alt="Footer" class="w-4 h-4 rounded-full mr-2">`;
+            }
+            html += `${footer}</div>`;
+            
+            preview.innerHTML = html;
+        }
+
+        async function sendEmbed() {
+            const channelId = document.getElementById('embed-channel').value;
+            if (!channelId) {
+                alert('Please enter a channel ID to send the embed to.');
+                return;
+            }
+            
+            const embedData = {
+                channelId: channelId,
+                customEmbed: {
+                    title: document.getElementById('embed-title').value,
+                    description: document.getElementById('embed-description').value,
+                    color: parseInt(document.getElementById('embed-color').value.replace('#', ''), 16),
+                    author: document.getElementById('embed-author').value,
+                    footer: document.getElementById('embed-footer').value,
+                    image: document.getElementById('embed-image').value
+                }
+            };
+            
+            try {
+                const response = await fetch('/api/send-embed', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(embedData)
+                });
+                
+                if (response.ok) {
+                    alert('Embed sent successfully!');
+                } else {
+                    const error = await response.json();
+                    alert('Error: ' + error.error);
+                }
+            } catch (error) {
+                console.error('Send embed error:', error);
+                alert('An error occurred while sending the embed.');
+            }
+        }
+
+        async function useEmbed(embedId) {
+            const channelId = prompt('Enter the channel ID to send this embed to:');
+            if (!channelId) return;
+            
+            try {
+                const response = await fetch('/api/send-embed', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        embedId: embedId,
+                        channelId: channelId
+                    })
+                });
+                
+                if (response.ok) {
+                    alert('Embed sent successfully!');
+                } else {
+                    const error = await response.json();
+                    alert('Error: ' + error.error);
+                }
+            } catch (error) {
+                console.error('Use embed error:', error);
+                alert('An error occurred while sending the embed.');
+            }
+        }
+
+        // Welcome Settings Functions
+        async function loadWelcomeSettings() {
+            try {
+                const response = await fetch('/api/welcome-settings');
+                const settings = await response.json();
+                
+                // Populate form with existing settings
+                document.getElementById('welcome-enabled').checked = settings.welcome_enabled || false;
+                document.getElementById('welcome-channel').value = settings.welcome_channel_id || '';
+                document.getElementById('welcome-message').value = settings.welcome_message || 'Welcome to {server}, {user}! We now have {membercount} members!';
+                
+                document.getElementById('leave-enabled').checked = settings.leave_enabled || false;
+                document.getElementById('leave-channel').value = settings.leave_channel_id || '';
+                document.getElementById('leave-message').value = settings.leave_message || '{username} has left {server}. We now have {membercount} members.';
+                
+                document.getElementById('verification-enabled').checked = settings.verification_enabled || false;
+                document.getElementById('verification-channel').value = settings.verification_channel_id || '';
+                document.getElementById('verification-role').value = settings.verification_role_id || '';
+                document.getElementById('verification-message').value = settings.verification_message || 'Please react with ✅ to verify and gain access to the server.';
+                
+                // Set embed selections
+                if (settings.welcome_embed_id) {
+                    document.getElementById('welcome-embed').value = settings.welcome_embed_id;
+                }
+                if (settings.leave_embed_id) {
+                    document.getElementById('leave-embed').value = settings.leave_embed_id;
+                }
+                
+            } catch (error) {
+                console.error('Error loading welcome settings:', error);
+            }
+        }
+
+        async function saveWelcomeSettings() {
+            const settings = {
+                welcome_enabled: document.getElementById('welcome-enabled').checked,
+                welcome_channel_id: document.getElementById('welcome-channel').value,
+                welcome_message: document.getElementById('welcome-message').value,
+                welcome_embed_id: document.getElementById('welcome-embed').value || null,
+                
+                leave_enabled: document.getElementById('leave-enabled').checked,
+                leave_channel_id: document.getElementById('leave-channel').value,
+                leave_message: document.getElementById('leave-message').value,
+                leave_embed_id: document.getElementById('leave-embed').value || null,
+                
+                verification_enabled: document.getElementById('verification-enabled').checked,
+                verification_channel_id: document.getElementById('verification-channel').value,
+                verification_role_id: document.getElementById('verification-role').value,
+                verification_message: document.getElementById('verification-message').value
+            };
+            
+            try {
+                const response = await fetch('/api/welcome-settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(settings)
+                });
+                
+                if (response.ok) {
+                    alert('Welcome settings saved successfully!');
+                } else {
+                    const error = await response.json();
+                    alert('Error: ' + error.error);
+                }
+            } catch (error) {
+                console.error('Save welcome settings error:', error);
+                alert('An error occurred while saving settings.');
+            }
+        }
+
+        async function testWelcome() {
+            try {
+                const response = await fetch('/api/test-welcome', {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    alert('Test welcome message sent!');
+                } else {
+                    alert('Error sending test welcome message. Make sure welcome is configured and enabled.');
+                }
+            } catch (error) {
+                console.error('Test welcome error:', error);
+                alert('An error occurred while testing welcome message.');
+            }
+        }
+
+        async function testLeave() {
+            try {
+                const response = await fetch('/api/test-leave', {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    alert('Test leave message sent!');
+                } else {
+                    alert('Error sending test leave message. Make sure leave messages are configured and enabled.');
+                }
+            } catch (error) {
+                console.error('Test leave error:', error);
+                alert('An error occurred while testing leave message.');
+            }
+        }
+
+        async function createVerification() {
+            const channelId = document.getElementById('verification-channel').value;
+            if (!channelId) {
+                alert('Please enter a verification channel ID first.');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/create-verification', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        channel_id: channelId,
+                        message: document.getElementById('verification-message').value
+                    })
+                });
+                
+                if (response.ok) {
+                    alert('Verification message created successfully!');
+                } else {
+                    const error = await response.json();
+                    alert('Error: ' + error.error);
+                }
+            } catch (error) {
+                console.error('Create verification error:', error);
+                alert('An error occurred while creating verification message.');
+            }
+        }
+
+        // Update real-time previews
+        document.getElementById('welcome-message')?.addEventListener('input', function() {
+            const preview = document.getElementById('welcome-preview');
+            if (preview) {
+                preview.textContent = this.value.replace(/{user}/g, '@TestUser').replace(/{username}/g, 'TestUser').replace(/{server}/g, 'Test Server').replace(/{membercount}/g, '1,234');
+            }
+        });
+
+        document.getElementById('leave-message')?.addEventListener('input', function() {
+            const preview = document.getElementById('leave-preview');
+            if (preview) {
+                preview.textContent = this.value.replace(/{user}/g, '@TestUser').replace(/{username}/g, 'TestUser').replace(/{server}/g, 'Test Server').replace(/{membercount}/g, '1,234');
+            }
+        });
+
+        // Auto-update preview when form fields change
+        ['embed-title', 'embed-description', 'embed-color', 'embed-author', 'embed-footer', 'embed-image', 'embed-thumbnail', 'embed-author-icon', 'embed-footer-icon'].forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.addEventListener('input', previewEmbed);
+            }
+        });
 
         // Initialize dashboard
         document.addEventListener('DOMContentLoaded', function() {
